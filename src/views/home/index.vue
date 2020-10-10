@@ -65,7 +65,7 @@ export default {
     return {
       active: 0,
       channels: [], // 频道列表
-      isChannelEditShow: true // 控制编辑频道的状态
+      isChannelEditShow: false // 控制编辑频道的状态
     }
   },
   computed: {},
