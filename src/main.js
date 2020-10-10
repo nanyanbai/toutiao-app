@@ -11,6 +11,8 @@ import 'amfe-flexible'
 
 import './styles/index.less'
 
+import './utils/dayjs'
+
 // 全局注册Vant 中的组件
 Vue.use(Vant)
 
