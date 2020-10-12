@@ -7,14 +7,18 @@
         plain
         round
         size="mini"
-      >编辑</van-button>
+        @click="isEdit =! isEdit"
+      >{{ isEdit ? '完成': '编辑' }}</van-button>
     </van-cell>
     <van-grid :gutter="10">
       <van-grid-item
         class="grid-item"
+        :class="{ active:index === active }"
+        :icon="(isEdit && index !==0) ? 'clear' : ''"
         v-for="(item, index) in userChannels"
         :key="index"
         :text="item.name"
+        @click="onUserChannelClick(index)"
       />
     </van-grid>
 
@@ -28,6 +32,7 @@
         v-for="(item, index) in recommendChannels"
         :key="index"
         :text="item.name"
+        @click="onAdd(item)"
       />
     </van-grid>
   </div>
@@ -42,15 +47,21 @@ export default {
     userChannels:{
       type: Array,
       required: true
+    },
+    active: {
+      type: Number,
+      required: true
     }
   },
   data () {
     return {
-      AllChannels: [] //所有频道数据列表
+      AllChannels: [], //所有频道数据列表
+      isEdit: false
     }
   },
   computed: {
     // 推荐的频道列表
+    // 计算属性会观测内部依赖数据的变化而重新求值
     recommendChannels () {
       return  this.AllChannels.filter(channel =>　{
         return  !this.userChannels.find(userChannels => {
@@ -66,6 +77,30 @@ export default {
     async loadAllChannels() {
       const { data } = await  getAllChannels()
       this.AllChannels = data.data.channels
+    },
+
+    onAdd(data) {
+      // console.log(data)
+      this.userChannels.push(data)
+      // 数据持久化
+    },
+
+    onUserChannelClick (index) {
+      // 编辑状态，删除频道
+      if(this.isEdit && index !==0) {  // 并且 index !== 0 是推荐频道不能删除，因为推荐频道的索引是 0
+        this.deleteChannel(index)
+      }else { // 非编辑状态，切换频道
+        this.switchChannel(index)
+      }
+    },
+    deleteChannel (index) {
+      this.userChannels.splice(index, 1)
+    },
+    switchChannel (index) {
+      // 切换频道
+      this.$emit('update-active', index)
+      // 关闭弹出层
+      this.$emit('close')
     }
   }
 }
@@ -86,8 +121,22 @@ export default {
       .van-grid-item__text{
         font-size: 14px;
         color:#222 ;
+        margin-top: 0;
       }
     }
+    /deep/ .van-icon-clear{
+      position: absolute;
+      right: -5px;
+      top: -5px;
+      font-size: 16px;
+      color: #ccc;
+    }
   }
+  .active {
+    /deep/ .van-grid-item__text{
+      color: red !important;
+    }
+  }
+
 }
 </style>

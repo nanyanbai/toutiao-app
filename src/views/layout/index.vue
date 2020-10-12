@@ -16,16 +16,16 @@
 </template>
 
 <script>
-    export default {
-        name: "LayoutIndex",
-        data() {
-          return {
-            active: 0,
-          }
-        }
+export default {
+  name: "LayoutIndex",
+  data() {
+    return {
+      active: 0,
     }
+  }
+}
 </script>
 
-<style scoped>
+<style scoped lang="less">
 
 </style>

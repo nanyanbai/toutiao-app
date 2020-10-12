@@ -43,7 +43,12 @@
         close-icon-position="top-left"
         get-container="body"
       >
-        <channel-edit :user-channels="channels" />
+        <channel-edit
+          :user-channels="channels"
+          :active="active"
+          @update-active="onUpdateActive"
+          @close="isChannelEditShow = false"
+        />
       </van-popup>
     </div>
 </template>
@@ -63,7 +68,7 @@ export default {
   props: {},
   data () {
     return {
-      active: 0,
+      active: 0, // 控制被激活的标签
       channels: [], // 频道列表
       isChannelEditShow: false // 控制编辑频道的状态
     }
@@ -77,6 +82,10 @@ export default {
       const { data } = await getUserChannels()
       // console.log(data);
       this.channels = data.data.channels
+    },
+
+    onUpdateActive (index) {
+      this.active = index
     }
   }
 }
