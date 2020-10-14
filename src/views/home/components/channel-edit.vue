@@ -18,7 +18,7 @@
         v-for="(item, index) in userChannels"
         :key="index"
         :text="item.name"
-        @click="onUserChannelClick(index)"
+        @click="onUserChannelClick(item, index)"
       />
     </van-grid>
 
@@ -39,7 +39,9 @@
 </template>
 
 <script>
-import { getAllChannels } from '@/api/channel'
+import { getAllChannels, addUserChannels, deleteUserChannels } from '@/api/channel'
+import { mapState } from 'vuex'
+import { setItem } from '@/utils/storage'
 
 export default {
   name: "ChannelEdit",
@@ -60,6 +62,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(['user']),
     // 推荐的频道列表
     // 计算属性会观测内部依赖数据的变化而重新求值
     recommendChannels () {
@@ -79,22 +82,43 @@ export default {
       this.AllChannels = data.data.channels
     },
 
-    onAdd(data) {
+    async onAdd(data) {
       // console.log(data)
       this.userChannels.push(data)
       // 数据持久化
+      if (this.user) { // 如果登录了，就把数据存储到数据库
+        await addUserChannels({
+          channels: [
+            {
+              id: data.id ,
+              seq: this.userChannels.length
+            }
+          ]
+        })
+      } else { // 没有登录，就把数据存储到本地
+        setItem('user-channels', this.userChannels)
+      }
     },
 
-    onUserChannelClick (index) {
+    onUserChannelClick (channle, index) {
       // 编辑状态，删除频道
       if(this.isEdit && index !==0) {  // 并且 index !== 0 是推荐频道不能删除，因为推荐频道的索引是 0
-        this.deleteChannel(index)
+        this.deleteChannel(channle,index)
       }else { // 非编辑状态，切换频道
         this.switchChannel(index)
       }
     },
-    deleteChannel (index) {
+    async deleteChannel (channle, index) {
+      if(index <= this.active) {
+        this.$emit('update-active', this.active - 1)
+      }
       this.userChannels.splice(index, 1)
+      // 数据持久化
+      if (this.user) {
+        await deleteUserChannels(channle.id)
+      } else {
+        setItem('user-channels', this.userChannels)
+      }
     },
     switchChannel (index) {
       // 切换频道

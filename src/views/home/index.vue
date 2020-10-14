@@ -7,6 +7,7 @@
           icon="search"
           round
           size="small"
+          to="/search"
         >搜索</van-button>
       </van-nav-bar>
 
@@ -57,6 +58,8 @@
 import { getUserChannels } from '@/api/user'
 import ArticleList from './components/article-list'
 import ChannelEdit from './components/channel-edit'
+import { mapState } from 'vuex'
+import { getItem } from '@/utils/storage'
 
 export default {
   name: "HomeIndex",
@@ -73,15 +76,34 @@ export default {
       isChannelEditShow: false // 控制编辑频道的状态
     }
   },
-  computed: {},
+  computed: {
+    ...mapState(['user'])
+  },
   created() {
     this.loadChannels()
   },
   methods: {
     async loadChannels () {
-      const { data } = await getUserChannels()
-      // console.log(data);
-      this.channels = data.data.channels
+      let channels = []
+      if (this.user) {
+        // 已登录，请求获取线上的用户频道列表数据
+        const { data } = await getUserChannels()
+        channels = data.data.channels
+      } else {
+        // 没有登录， 判断是否有本地储存的频道列表数据
+        const localChannels = getItem('user-channels')
+        if (localChannels) {
+          channels = localChannels
+        } else {
+          // 用户没有登录，也没有本地储存的频道， 俺就请求获取默认推荐的频道列表
+          const { data } = await getUserChannels()
+          channels = data.data.channels
+        }
+      }
+      this.channels = channels
+      // const { data } = await getUserChannels()
+      // // console.log(data);
+      // this.channels = data.data.channels
     },
 
     onUpdateActive (index) {
