@@ -30,16 +30,23 @@
     <!-- /联想建议 -->
 
     <!-- 历史记录 -->
-    <search-history v-else />
+    <search-history
+      v-else
+      :search-historys="searchHistories"
+      @search="onSearch"
+    />
     <!-- /历史记录 -->
 
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
+import { setItem, getItem } from '@/utils/storage'
 import SearchSuggestion from './components/search-suggestion'
 import SearchHistory from './components/search-history'
 import SearchResult from './components/search-result'
+import { getSearchHistories } from '@/api/search'
 
 export default {
   name: 'SearchIndex',
@@ -55,8 +62,14 @@ export default {
       searchHistories: [] // 搜索历史数据
     }
   },
+  computed: {
+    ...mapState(['user'])
+  },
+  created () {
+    this.loadSearchHistories()
+  },
   methods: {
-    onSearch (searchText) {
+     onSearch (searchText) {
       this.searchText = searchText
 
       const index = this.searchHistories.indexOf(searchText)
@@ -67,8 +80,30 @@ export default {
       // 记录搜索历史记录, 历史记录不能有重复的
       this.searchHistories.unshift(searchText)
 
+      // 如果是已登录用户， 则把搜索历史记录数据存储到线上
+
+      // 如果未登录状态， 则把搜索历史记录数据存储在本地
+      setItem('search-histories', this.searchHistories)
       // 展示搜索结果
       this.isResultShow = true
+    },
+
+    async loadSearchHistories () {
+      // 因为后端存储的用户搜索历史记录太少了
+      // 在这里我们让后端返回的历史记录和本地储存的历史记录合并到一起
+      let searchHistories = getItem('search-histories') || []
+      if (this.user) {
+        const { data } = await getSearchHistories()
+        // console.log(data.data.keywords)
+        // 合并数组 [..., ...]
+        // 把 Set 转换成数组： [...Set对象]
+        searchHistories = [...new Set([  // es6的取重 Set类似数组，但不是数组， 所以还要把它转化成数组
+          ...searchHistories,
+          ...data.data.keywords
+        ])]
+      }
+
+      this.searchHistories = searchHistories
     },
 
     onCancel () {
