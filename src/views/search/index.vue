@@ -34,6 +34,7 @@
       v-else
       :search-historys="searchHistories"
       @search="onSearch"
+      @update-histories="searchHistories = $event"
     />
     <!-- /历史记录 -->
 
@@ -64,6 +65,11 @@ export default {
   },
   computed: {
     ...mapState(['user'])
+  },
+  watch: {
+    searchHistories () {
+      setItem('search-histories', this.searchHistories)
+    }
   },
   created () {
     this.loadSearchHistories()
