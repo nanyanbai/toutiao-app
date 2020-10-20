@@ -219,8 +219,8 @@ export default {
       this.isPostShow = false
     },
 
-    onReplyClick (data) {
-      this.replyComment = data
+    onReplyClick (comment) {
+      this.replyComment = comment
       this.isReplyShow = true
     }
   }
