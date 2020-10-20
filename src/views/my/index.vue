@@ -52,8 +52,16 @@
 
       <!-- 未登录状态 -->
       <div v-else class="not-login">
-        <div class="mobile" @click="$router.push('/login')"></div>
-        <div class="text" >点击登录</div>
+        <div
+          class="mobile"
+          @click="$router.push({
+            name: 'login',
+            query: {
+              redirect: '/my'
+            }
+          })"
+        ></div>
+        <div class="text" >登录 / 注册</div>
       </div>
 
       <van-grid class="nav-grid mb-4" :column-num="2">
