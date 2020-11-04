@@ -81,7 +81,7 @@
       </van-grid>
 
       <van-cell title="消息通知" is-link to="" />
-      <van-cell title="小智同学" class="mb-4" is-link to="" />
+      <van-cell title="小智同学" class="mb-4" is-link to="/user/chat" />
 
       <van-cell
         v-if="user"
